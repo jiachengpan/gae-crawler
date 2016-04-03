@@ -39,7 +39,7 @@ class Cron5Min(webapp2.RequestHandler):
 class Cron1Min(webapp2.RequestHandler):
     def get(self):
         result = 0
-        run_jobs(cron.Interval.ONE_Min.value)
+        run_jobs(cron.Interval.ONE_MIN.value)
         self.response.write(result)
 
 
