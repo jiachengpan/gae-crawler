@@ -1,0 +1,12 @@
+cron:
+- description: per-1-min cronjob
+  url: /_cron/1min
+  schedule: every 1 mins synchronized
+
+- description: per-5-min cronjob
+  url: /_cron/5min
+  schedule: every 5 mins synchronized
+
+- description: per-1-hour cronjob
+  url: /_cron/1hour
+  schedule: every 1 hours synchronized

@@ -1,0 +1,19 @@
+- name: douban group
+  class: proc.douban.ProcedureDouban
+  fields:
+    url: []
+    xmpp: []
+
+- name: smzdm search
+  class: proc.smzdm.ProcedureSMZDM
+  fields:
+    url: []
+    xmpp: []
+
+- name: xianyu search
+  class: proc.xianyu.ProcedureXianyu
+  fields:
+    url: []
+    xmpp: []
+    min_price: []
+    max_price: []

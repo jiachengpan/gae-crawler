@@ -1,0 +1,78 @@
+{% extends "templates/base.html" %}
+{% block body %}
+<div class="container">
+  {% if 'success' in laststatus %}
+    {% if laststatus.success%}
+    <div class="alert alert-success">Success</div>
+    {% else %}
+    <div class="alert alert-danger">Failed</div>
+    {% endif %}
+  {% endif %}
+  {% for description in descriptions %}
+  <form class="form-group" action="/jobs/add" method="get">
+    <div class="form-inline">
+      <label>{{ description.name|upper }}</label>
+      <select name="interval" class="input-sm form-control">
+          {% for v in description.interval %}
+          <option value="{{v.value}}">{{v.name}}</option>
+          {% endfor %}
+        </select>
+
+      <input type="hidden" name="type_name" value="{{description.class}}">
+      <button type="submit" class="btn btn-default btn-sm">Add</button>
+    </div>
+    <div class="form-inline">
+      <input type="text" name="name" class="form-control" placeholder="Name">
+      {% for name in description.fields | sort %}
+        {% if vals %}
+        <select name="param_{{name}}" class="form-control">
+          {% for v in vals %}
+          <option value="{{v}}">{{v}}</option>
+          {% endfor %}
+        </select>
+        {% else %}
+        <input name="param_{{name}}" type="text" placeholder="{{name}}" class="form-control">
+        {% endif %}
+      {% endfor %}
+
+    </div>
+  </form>
+  {% endfor %}
+
+  <hr>
+
+  {% if jobs %}
+  <table class="table table-striped table-condensed" style="font-family: monospace">
+  <thead><tr>
+      <td></td>
+      <td>Name</td>
+      <td>Interval</td>
+      <td>Type</td>
+      <td>Parameters</td>
+  </tr></thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>
+        <form action="/jobs/delete" method="get">
+          <input type="hidden" name="type_name" value="{{ job.type }}">
+          <input type="hidden" name="name" value="{{ job.name}}">
+          <button type="submit" class="btn btn-xs btn-danger">del</button>
+        </form>
+      </td>
+      <td>{{ job.name }}</td>
+      <td>{{ job.interval }}</td>
+      <td>{{ job.type }}</td>
+      <td>
+        {% for k in job.param | sort %}
+        <strong>{{k}}: </strong>{{job.param[k]}}</br>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+  {% endif %}
+
+</div>
+{% endblock %}

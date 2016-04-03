@@ -1,0 +1,4 @@
+Notification from: {{name}}
+{% for msg in messages %}
+* {{msg}}
+{% endfor %}
