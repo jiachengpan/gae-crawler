@@ -20,7 +20,10 @@ def run_jobs(interval):
     for job_type, job_name, job_param in jobs:
         logging.debug('running job {}'.format(job_name))
         job_param['__name__'] = job_name
-        proc_type2proc_class[job_type].do_work(job_param)
+        try:
+            proc_type2proc_class[job_type].do_work(job_param)
+        except Exception as e:
+            logging.error('Job {} failed due to: {}'.format(job_name, e.message))
 
 class Cron1Hour(webapp2.RequestHandler):
     def get(self):

@@ -27,12 +27,17 @@ class ProcedureDouban(ProcedureBase):
         if 'max_count' in args:
             max_count = args['max_count']
 
-        ret = urlfetch.fetch(
-                url=args['url'],
-                follow_redirects=False,
-                headers=HEADER,
-                deadline=60,
-                )
+        try:
+            ret = urlfetch.fetch(
+                    url=args['url'],
+                    follow_redirects=False,
+                    headers=HEADER,
+                    deadline=60,
+                    )
+        except Exception as e:
+            logging.error(e.message)
+            return []
+
         if ret.status_code not in (200, 302):
             logging.error('URL Fetch failed. status {0}; url {1}.'.format(ret.status_code, args['url']))
             return []
@@ -66,12 +71,17 @@ class ProcedureDouban(ProcedureBase):
     @classmethod
     def fetch_thread(cls, title, url):
         logging.debug('loading %s @ %s' % (title, url))
-        ret = urlfetch.fetch(
-                url=url,
-                follow_redirects=False,
-                headers=HEADER,
-                deadline=60,
-                )
+        try:
+            ret = urlfetch.fetch(
+                    url=url,
+                    follow_redirects=False,
+                    headers=HEADER,
+                    deadline=60,
+                    )
+        except Exception as e:
+            logging.error(e.message)
+            return None
+
         if ret.status_code not in (200, 302):
             logging.error('URL Fetch failed. status {0}; url {1}.'.format(ret.status_code, url))
             return None

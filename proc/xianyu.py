@@ -27,12 +27,17 @@ class ProcedureXianyu(ProcedureBase):
         if 'max_count' in args:
             max_count = args['max_count']
 
-        ret = urlfetch.fetch(
-                url=args['url'],
-                follow_redirects=True,
-                headers=HEADER,
-                deadline=60,
-                )
+        try:
+            ret = urlfetch.fetch(
+                    url=args['url'],
+                    follow_redirects=True,
+                    headers=HEADER,
+                    deadline=60,
+                    )
+        except Exception as e:
+            logging.error(e.message)
+            return []
+
         if ret.status_code not in (200, 302):
             logging.error('URL Fetch failed. status {0}; url {1}.'.format(ret.status_code, args['url']))
             return []
