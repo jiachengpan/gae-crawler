@@ -3,12 +3,13 @@ from google.appengine.api import memcache
 import hashlib
 
 class ProcItem(ndb.Model):
-    type_name   = ndb.StringProperty()
-    item_hash   = ndb.StringProperty()
+    type_name   = ndb.StringProperty(required=True)
+    item_hash   = ndb.StringProperty(required=True)
     last_update = ndb.DateTimeProperty(auto_now=True)
-    title       = ndb.StringProperty()
+    title       = ndb.StringProperty(required=True)
     content     = ndb.JsonProperty()
 
+    # TODO: implement a batch add
     @classmethod
     def add_item(cls, type_name, title, content):
         text = ''
