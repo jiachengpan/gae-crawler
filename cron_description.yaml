@@ -4,12 +4,6 @@
     url: []
     xmpp: []
 
-- name: douban rent
-  class: proc.douban_rent.ProcedureDoubanRent
-  fields:
-    url: []
-    xmpp: []
-
 - name: smzdm search
   class: proc.smzdm.ProcedureSMZDM
   fields:

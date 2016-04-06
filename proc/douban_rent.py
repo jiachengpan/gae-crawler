@@ -7,6 +7,7 @@ import re
 import jieba
 import jieba.posseg as pseg
 
+# TODO: move this to backend
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 jieba.load_userdict(os.path.join(root_dir, 'resources/dict/shanghai.dict'))
