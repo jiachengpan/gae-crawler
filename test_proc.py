@@ -6,6 +6,7 @@ from google.appengine.ext import testbed
 
 import datetime
 import proc.douban
+import proc.douban_rent
 
 class TestModels(unittest.TestCase):
     def setUp(self):
@@ -19,9 +20,10 @@ class TestModels(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
+    #@unittest.skip("skip temporarily")
     def testBasic(self):
         URL = "https://www.douban.com/group/173252/"
-        MAX = 3
+        MAX = 10
 
         ret = proc.douban.ProcedureDouban.do_work({
             'url': URL,
@@ -35,6 +37,17 @@ class TestModels(unittest.TestCase):
             'max_count': MAX,
             })
         self.assertEqual(0, len(ret))
+
+    #@unittest.skip("skip temporarily")
+    def testDoubanRent(self):
+        URL = "https://www.douban.com/group/173252/"
+        MAX = 10
+
+        ret = proc.douban_rent.ProcedureDoubanRent.do_work_core({
+            'url': URL,
+            'max_count': MAX,
+            })
+        self.assertEqual(MAX, len(ret))
 
 
 if __name__ == '__main__':

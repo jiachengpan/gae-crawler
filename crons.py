@@ -6,7 +6,7 @@ import os
 import inspect
 import yaml
 from models import cron
-from proc import douban, smzdm, xianyu
+from proc import douban, smzdm, xianyu, douban_rent
 
 proc_type2proc_class = {}
 for m in (douban, smzdm, xianyu):
