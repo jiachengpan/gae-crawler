@@ -6,7 +6,6 @@ from enum import Enum
 class Interval(Enum):
     ONE_HOUR = '1hour'
     FIVE_MIN = '5min'
-#    ONE_MIN  = '1min'
 
 class CronJobs(ndb.Model):
     interval    = ndb.StringProperty(

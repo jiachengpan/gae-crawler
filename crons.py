@@ -38,14 +38,6 @@ class Cron5Min(webapp2.RequestHandler):
         run_jobs(cron.Interval.FIVE_MIN.value)
         self.response.write(result)
 
-
-class Cron1Min(webapp2.RequestHandler):
-    def get(self):
-        result = 0
-        run_jobs(cron.Interval.ONE_MIN.value)
-        self.response.write(result)
-
-
 def get_cron_descriptions():
     with open(os.path.join(os.path.dirname(__file__), 'cron_description.yaml')) as fh:
         descs = yaml.load(fh.read())
