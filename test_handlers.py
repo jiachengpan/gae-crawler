@@ -6,7 +6,7 @@ from google.appengine.ext import testbed
 
 import datetime
 from models import proc_item
-import fetch_handlers
+import handlers
 
 class TestModels(unittest.TestCase):
     def setUp(self):
@@ -27,7 +27,7 @@ class TestModels(unittest.TestCase):
         proc_item.ProcItem.add_item('typeA', 'titleB', content)
         proc_item.ProcItem.add_item('typeA', 'titleC', content)
 
-        ret = fetch_handlers.fetch_raw_data()
+        ret = handers.fetch_raw_data()
         self.assertEqual(3, len(ret))
 
 if __name__ == '__main__':

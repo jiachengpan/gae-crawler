@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import tempfile
+import sys
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -13,20 +14,24 @@ class RentParser(object):
     initialized = False
 
     regexp_room_type = re.compile(
-            u'[0-9{}]室[0-9{}]厅|[0-9{}]居室?'.format(zh_num, zh_num, zh_num),
+            u'(([0-9%s][居房室厅卫]+)+)' % zh_num,
             re.UNICODE)
     regexp_fee = re.compile(
             u'(\d{3,4})([元]?[/每]?月|元)|(价格|租金|价)\D?(\d{3,4})\D',
+            re.UNICODE)
+    regexp_tele= re.compile(
+            u'(1\d{2}-?\d{3}-?\d{5}|1\d{2}-?\d{4}-?\d{4})',
             re.UNICODE)
 
     jieba = None
 
     @classmethod
     def initialize(cls):
-        logging.info('initialising')
+        logging.info('initialising jieba')
         import jieba
         # we cannot use tempfile in appengine, so cache files are generated in advance locally
         jieba.dt.tmp_dir = os.path.join(root_dir, 'resources/cache/')
+        jieba.default_logger.removeHandler(jieba.log_console)
         jieba.dt.cache_file = os.path.join(root_dir, 'resources/cache/jieba.cache')
         jieba.load_userdict(os.path.join(root_dir, 'resources/dict/shanghai.dict'))
 
@@ -43,8 +48,8 @@ class RentParser(object):
         def parse_room_type(text):
             result = set()
             for match in cls.regexp_room_type.findall(text):
-                match = ''.join([num2zh_num[c] if c in num2zh_num else c for c in match])
-                result.add(match)
+                match = ''.join([num2zh_num[c] if c in num2zh_num else c for c in match[0]])
+                result.add(match.replace(u'二', u'两'))
             return list(result)
 
         def parse_price(text):
@@ -60,13 +65,21 @@ class RentParser(object):
                     result.add(seg.word)
             return list(result)
 
+        def parse_telephone(text):
+            result = set()
+            for match in cls.regexp_tele.findall(text):
+                result.add(match.replace('-', ''))
+            return list(result)
+
         room_type   = parse_room_type(text)
         price       = parse_price(text)
         address     = parse_address(text)
+        telephone   = parse_telephone(text)
         return {
                 'room_type':    room_type,
                 'price':        price,
                 'address':      address,
+                'telephone':    telephone,
                 }
 
     @classmethod
