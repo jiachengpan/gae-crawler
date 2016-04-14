@@ -27,7 +27,7 @@ class TestModels(unittest.TestCase):
         proc_item.ProcItem.add_item('typeA', 'titleB', content)
         proc_item.ProcItem.add_item('typeA', 'titleC', content)
 
-        ret = handers.fetch_raw_data()
+        ret = handlers.fetch_raw_data(handlers.totimestamp(datetime.datetime.utcnow() - datetime.timedelta(minutes=3)))
         self.assertEqual(3, len(ret))
 
 if __name__ == '__main__':

@@ -4,6 +4,11 @@ import os
 import re
 import tempfile
 import sys
+import urllib
+import api_config
+import json
+
+from google.appengine.api import urlfetch
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -41,6 +46,37 @@ class RentParser(object):
         cls.jieba   = jieba
 
     @classmethod
+    def query_place(cls, text):
+        URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
+
+        form_fields = {
+                'query': text.encode('utf-8'),
+                'key': api_config.api_key,
+                'language': 'zh_cn',
+                }
+        form_data = urllib.urlencode(form_fields)
+        try:
+            response = urlfetch.fetch(
+                    url=URL + form_data,
+                    deadline=60,
+                    )
+        except Exception as e:
+            logging.error(str(e))
+            return
+
+        data = json.loads(response.content)
+        if data['status'] != 'OK':
+            logging.warning('Status isnt ok: %s' % data['status'])
+            if 'error_message' in data:
+                logging.warning('Error: %s' % data['error_message'])
+            return
+
+        result = []
+        for item in data['results']:
+            result.append(item['geometry']['location'])
+        return result
+
+    @classmethod
     def parse_text(cls, text):
         if not cls.initialized: cls.initialize()
 
@@ -75,11 +111,17 @@ class RentParser(object):
         price       = parse_price(text)
         address     = parse_address(text)
         telephone   = parse_telephone(text)
+
+        if len(address):
+            location = cls.query_place(u'上海' + ' '.join(address))
+        else:
+            location = []
         return {
                 'room_type':    room_type,
                 'price':        price,
                 'address':      address,
                 'telephone':    telephone,
+                'location':     location,
                 }
 
     @classmethod

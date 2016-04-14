@@ -30,13 +30,11 @@ class CronJobs(ndb.Model):
 
     @classmethod
     def add_job(cls, interval, type_name, name, parameters):
-        jobs = cls.get_jobs_by_type(type_name)
-
-        job_search = set([j[1] for j in jobs])
-        if name in job_search:
-            return False
+        job_key = ndb.Key(cls, type_name + name)
+        if job_key.get(): return False
 
         CronJobs(
+                key=job_key,
                 interval=interval,
                 type_name=type_name,
                 name=name,

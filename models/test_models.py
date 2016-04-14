@@ -4,7 +4,8 @@ from google.appengine.ext import ndb
 from google.appengine.api import memcache
 from google.appengine.ext import testbed
 
-import cron as models
+import cron
+import proc_item
 import datetime
 
 class TestModels(unittest.TestCase):
@@ -21,14 +22,21 @@ class TestModels(unittest.TestCase):
         self.testbed.deactivate()
 
     def testQueryJobsByInterval(self):
-        models.CronJobs(
+        cron.CronJobs(
                 interval='1hour',
                 name='test0',
                 parameters=None,
                 last_update=datetime.datetime.now(),
                 ).put()
-        ret = models.CronJobs.get_jobs_by_interval('1hour')
+        ret = cron.CronJobs.get_jobs_by_interval('1hour')
         self.assertEqual(1, len(ret))
+
+    def testProItem(self):
+        ret1 = proc_item.ProcItem.add_item('typeA', 'titleA', '')
+        ret2 = proc_item.ProcItem.add_item('typeA', 'titleA', '')
+        self.assertTrue(ret1)
+        self.assertFalse(ret2)
+
 
 if __name__ == '__main__':
     unittest.main()

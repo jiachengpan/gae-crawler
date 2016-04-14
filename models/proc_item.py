@@ -2,10 +2,10 @@ from google.appengine.ext import ndb
 from google.appengine.api import memcache
 import hashlib
 import datetime
+import logging
 
 class ProcItem(ndb.Model):
     type_name   = ndb.StringProperty(required=True)
-    item_hash   = ndb.StringProperty(required=True)
     last_update = ndb.DateTimeProperty(auto_now=True)
     title       = ndb.StringProperty(required=True)
     content     = ndb.JsonProperty()
@@ -16,40 +16,31 @@ class ProcItem(ndb.Model):
         text = ''
         if 'text' in content:
             text = content['text']
-        digest = hashlib.sha256(type_name + title.encode('utf-8') + text.encode('utf-8')).hexdigest()
+        item_id = hashlib.sha256('%s_%s_%s' % (type_name, title.encode('utf-8'), text.encode('utf-8'))).hexdigest()
+        cache_key = 'ProcItem_%s' % item_id
 
-        key = 'proc_item_hash_{}'.format(type_name)
-        cache_ret = memcache.get(key)
+        if memcache.get(cache_key): return False
 
-        if not cache_ret:
-            digests = ProcItem.query(ProcItem.type_name == type_name, projection=[ProcItem.item_hash]).fetch(1000)
-            digests = [r.item_hash for r in digests]
-        else:
-            digests = cache_ret
-
-        if digest in digests:
-            if not cache_ret: memcache.set(key=key, value=digests)
+        key = ndb.Key(cls, item_id)
+        if key.get():
+            memcache.set(cache_key, True)
             return False
 
-        digests.append(digest)
         ProcItem(
+                key=key,
                 type_name=type_name,
-                item_hash=digest,
                 title=title,
                 content=content,
                 ).put()
-        memcache.set(key=key, value=digests)
+        memcache.set(cache_key, True)
         return True
 
     @classmethod
-    def get_latest_items(cls, timediff=datetime.timedelta(minutes=5)):
-        time = datetime.datetime.utcnow()-timediff
+    def get_latest_items(cls, time=datetime.datetime.utcnow()):
+        if isinstance(time, datetime.timedelta):
+            time = datetime.datetime.utcnow()-time
+        logging.debug(time)
+        logging.debug([i.last_update for i in ProcItem.query().order(-ProcItem.last_update).fetch(2)])
         records = ProcItem.query(ProcItem.last_update > time).fetch()
-        return records
-
-    @classmethod
-    def get_old_items(cls, timediff=datetime.timedelta(days=30)):
-        time = datetime.datetime.utcnow()-timediff
-        records = ProcItem.query(ProcItem.last_update < time).fetch()
         return records
 

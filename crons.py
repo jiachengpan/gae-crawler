@@ -23,7 +23,9 @@ def run_jobs(interval):
         try:
             proc_type2proc_class[job_type].do_work(job_param)
         except Exception as e:
-            logging.error('Job {} failed due to: {}'.format(job_name, e.message))
+            import traceback
+            logging.error('Job {} failed due to: {}'.format(job_name, str(e)))
+            traceback.print_exc()
 
 class Cron1Hour(webapp2.RequestHandler):
     def get(self):
