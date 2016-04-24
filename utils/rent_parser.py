@@ -16,8 +16,6 @@ zh_num = u'一两三四五六七八九二'
 num2zh_num = { str(i+1): zh_num[i] for i in range(9) }
 
 class RentParser(object):
-    initialized = False
-
     regexp_room_type = re.compile(
             u'(([0-9%s][居房室厅卫]+)+)' % zh_num,
             re.UNICODE)
@@ -28,10 +26,10 @@ class RentParser(object):
             u'(1\d{2}-?\d{3}-?\d{5}|1\d{2}-?\d{4}-?\d{4})',
             re.UNICODE)
 
-    jieba = None
+    def __init__(self):
+        self.initialize()
 
-    @classmethod
-    def initialize(cls):
+    def initialize(self):
         logging.info('initialising jieba')
         import jieba
         # we cannot use tempfile in appengine, so cache files are generated in advance locally
@@ -42,11 +40,10 @@ class RentParser(object):
 
         import jieba.posseg
 
-        cls.initialized = True
-        cls.jieba   = jieba
+        self.initialized = True
+        self.jieba   = jieba
 
-    @classmethod
-    def query_place(cls, text):
+    def query_place(self, text):
         URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
 
         form_fields = {
@@ -76,34 +73,33 @@ class RentParser(object):
             result.append(item['geometry']['location'])
         return result
 
-    @classmethod
-    def parse_text(cls, text):
-        if not cls.initialized: cls.initialize()
+    def parse_text(self, text):
+        if not self.initialized: self.initialize()
 
         """simple text parser, refer to zhaoxinwo/zufang"""
         def parse_room_type(text):
             result = set()
-            for match in cls.regexp_room_type.findall(text):
+            for match in self.regexp_room_type.findall(text):
                 match = ''.join([num2zh_num[c] if c in num2zh_num else c for c in match[0]])
                 result.add(match.replace(u'二', u'两'))
             return list(result)
 
         def parse_price(text):
             result = set()
-            for match in cls.regexp_fee.findall(text):
+            for match in self.regexp_fee.findall(text):
                 result.add(int(match[0] if match[0] else int(match[-1])))
             return list(result)
 
         def parse_address(text):
             result = set()
-            for seg in cls.jieba.posseg.cut(text):
+            for seg in self.jieba.posseg.cut(text):
                 if seg.flag in ('shanghai',):
                     result.add(seg.word)
             return list(result)
 
         def parse_telephone(text):
             result = set()
-            for match in cls.regexp_tele.findall(text):
+            for match in self.regexp_tele.findall(text):
                 result.add(match.replace('-', ''))
             return list(result)
 
@@ -113,7 +109,7 @@ class RentParser(object):
         telephone   = parse_telephone(text)
 
         if len(address):
-            location = cls.query_place(u'上海' + ' '.join(address))
+            location = self.query_place(u'上海' + ' '.join(address))
         else:
             location = []
         return {
@@ -124,14 +120,13 @@ class RentParser(object):
                 'location':     location,
                 }
 
-    @classmethod
-    def parse(cls, data):
-        if not cls.initialized: cls.initialize()
+    def parse(self, data):
+        if not self.initialized: self.initialize()
 
         result = []
         for datum in data:
             try:
-                more_context = cls.parse_text('%s,%s' % (datum['title'], datum['content']['text']))
+                more_context = self.parse_text('%s,%s' % (datum['title'], datum['content']['text']))
                 datum['content'].update(more_context)
                 result.append(datum)
             except Exception as e:

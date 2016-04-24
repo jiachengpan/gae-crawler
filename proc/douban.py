@@ -113,5 +113,6 @@ class ProcedureDouban(ProcedureBase):
         return (_title, {
             'text': _content,
             'pics': _pics,
+            'url': url,
             },)
 

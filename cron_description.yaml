@@ -3,17 +3,20 @@
   fields:
     url: []
     xmpp: []
+    post: []
 
 - name: smzdm search
   class: proc.smzdm.ProcedureSMZDM
   fields:
     url: []
     xmpp: []
+    post: []
 
 - name: xianyu search
   class: proc.xianyu.ProcedureXianyu
   fields:
     url: []
     xmpp: []
+    post: []
     min_price: []
     max_price: []

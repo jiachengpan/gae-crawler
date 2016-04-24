@@ -23,7 +23,8 @@ def fetch_raw_data(time):
 
 def fetch_parsed_for_rent_data(time):
     data = fetch_raw_data(time)
-    result = rent_parser.RentParser.parse(data)
+    parser = rent_parser.RentParser()
+    result = parser.parse(data)
     return result
 
 class FetchRawHandler(webapp2.RequestHandler):
